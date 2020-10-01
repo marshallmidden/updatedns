@@ -1,0 +1,28 @@
+#!/bin/bash -x
+#-----------------------------------------------------------------------------
+# Allow a list -- for multiple machines -- although if they are linked, you should only need 1.
+declare -a NS=("bindnumber1")
+declare -a NSIP=("10.0.1.2")
+#-----------------------------------------------------------------------------
+# Directory where files are located
+TARDIR="/usr/local/etc"
+declare -a FILES=("named.conf" "zones")
+#-----------------------------------------------------------------------------
+for ((i=0; i<${#FILES[@]}; ++i)); do
+  FILES[$i]="-C ${TARDIR} ${FILES[$i]}"
+done
+#-----------------------------------------------------------------------------
+for ((i=0; i<"${#NS[@]}"; ++i)); do
+    # Remove ancient saved files.
+    rm -rf ancient.${NS[$i]}
+    if [ -d ${NS[$i]} ]; then
+        mv ${NS[$i]} ancient.${NS[$i]}
+    fi
+    mkdir ${NS[$i]}
+    # Save configuration for Name Server.
+    ssh root@${NSIP[$i]} "rndc sync -clean; tar cf - ${FILES[@]}" | \
+	tar xf - -C ${NS[$i]}
+done
+#-----------------------------------------------------------------------------
+exit 0
+#-----------------------------------------------------------------------------
