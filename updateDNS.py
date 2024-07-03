@@ -385,6 +385,8 @@ def main(values):
             epilog= 'Change dynamic DNS for {}\n'.format(FULLDOMAIN))
         parser.add_argument('-q', '--quiet', action='store_true',
                             help = 'Do not print nsupdate commands to execute.')
+        parser.add_argument('-debug', '--debug', action='store_true',
+                            help = 'Print out debug testing messages.')
         parser.add_argument('rest', nargs='*',
                             metavar='[add|delete|remove/show] [name|ip] ...',
                             help='Add/remove/show items in dynamic DNS.')
@@ -1167,6 +1169,10 @@ def main(values):
     args = parse_args(values)
 
     quiet = args.quiet
+    if args.debug:
+        debug_routines()
+        return
+    # fi
 
     if args.rest and args.rest[0]:
         process_line(args.rest)
